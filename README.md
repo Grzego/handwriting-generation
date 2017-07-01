@@ -1,7 +1,7 @@
 ## Handwriting generation
 Implementation of handwriting generation with use of recurrent neural networks in tensorflow. Based on Alex Graves paper (https://arxiv.org/abs/1308.0850).
 
-## How to train a model
+## How to train a model and generate handwriting
 
 #### 1. Download dataset
 First you need to download this dataset ([data/original-xml-part.tar.gz](http://www.fki.inf.unibe.ch/databases/iam-on-line-handwriting-database/download-the-iam-on-line-handwriting-database)) and unpack it in repository directory.
@@ -34,7 +34,7 @@ With default settings training took about 5h (using tensorflow 1.2, with GTX 108
 python generate.py --model=path_to_model
 ```
 
-When model is trained you can use `generate.py` scipt to test how it works. Without providing `--text` argument this script will ask you what to generate in loop.
+When model is trained you can use `generate.py` scipt to test how it works. Without providing `--text` argument this script will ask you what to generate in a loop.
 
 Additional options for generation:
 * `--bias` (`float`) - with higher bias generated handwriting is more _clear_ so to speak (read paper for more info)

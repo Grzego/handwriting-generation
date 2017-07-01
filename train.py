@@ -34,9 +34,12 @@ class WindowLayer(object):
 
     def __call__(self, inputs, k, reuse=None):
         with tf.variable_scope('window', reuse=reuse):
-            alpha = tf.layers.dense(inputs, self.num_mixtures, activation=tf.exp, name='alpha')
-            beta = tf.layers.dense(inputs, self.num_mixtures, activation=tf.exp, name='beta')
-            kappa = tf.layers.dense(inputs, self.num_mixtures, activation=tf.exp, name='kappa')
+            alpha = tf.layers.dense(inputs, self.num_mixtures, activation=tf.exp,
+                                    kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='alpha')
+            beta = tf.layers.dense(inputs, self.num_mixtures, activation=tf.exp,
+                                   kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='beta')
+            kappa = tf.layers.dense(inputs, self.num_mixtures, activation=tf.exp,
+                                    kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='kappa')
 
             a = tf.expand_dims(alpha, axis=2)
             b = tf.expand_dims(beta, axis=2)
@@ -66,13 +69,20 @@ class MixtureLayer(object):
 
     def __call__(self, inputs, bias=0., reuse=None):
         with tf.variable_scope('mixture_output', reuse=reuse):
-            e = tf.layers.dense(inputs, 1, name='e')
-            pi = tf.layers.dense(inputs, self.num_mixtures, name='pi')
-            mu1 = tf.layers.dense(inputs, self.num_mixtures, name='mu1')
-            mu2 = tf.layers.dense(inputs, self.num_mixtures, name='mu2')
-            std1 = tf.layers.dense(inputs, self.num_mixtures, name='std1')
-            std2 = tf.layers.dense(inputs, self.num_mixtures, name='std2')
-            rho = tf.layers.dense(inputs, self.num_mixtures, name='rho')
+            e = tf.layers.dense(inputs, 1,
+                                kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='e')
+            pi = tf.layers.dense(inputs, self.num_mixtures,
+                                 kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='pi')
+            mu1 = tf.layers.dense(inputs, self.num_mixtures,
+                                  kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='mu1')
+            mu2 = tf.layers.dense(inputs, self.num_mixtures,
+                                  kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='mu2')
+            std1 = tf.layers.dense(inputs, self.num_mixtures,
+                                   kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='std1')
+            std2 = tf.layers.dense(inputs, self.num_mixtures,
+                                   kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='std2')
+            rho = tf.layers.dense(inputs, self.num_mixtures,
+                                  kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='rho')
 
             return tf.nn.sigmoid(e), \
                    tf.nn.softmax(pi * (1. + bias)), \

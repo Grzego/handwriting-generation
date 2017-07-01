@@ -6,16 +6,18 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.mlab as mlab
+from matplotlib import animation
 import seaborn
 from collections import namedtuple
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--model', dest='model_path', type=str, default=os.path.join('pretrained', 'model-100'))
+parser.add_argument('--model', dest='model_path', type=str, default=os.path.join('pretrained', 'model-29'))
 parser.add_argument('--text', dest='text', type=str, default=None)
 parser.add_argument('--bias', dest='bias', type=float, default=1.)
 parser.add_argument('--force', dest='force', action='store_true', default=False)
 parser.add_argument('--animation', dest='animation', action='store_true', default=False)
 parser.add_argument('--noinfo', dest='info', action='store_false', default=True)
+parser.add_argument('--save', dest='save', type=str, default=None)
 args = parser.parse_args()
 
 
@@ -138,10 +140,12 @@ def main():
                 ax[0, 0].imshow(z_grid, interpolation='bilinear', aspect='auto', cmap=cm.jet)
                 ax[0, 0].grid(False)
                 ax[0, 0].set_title('Densities')
+                ax[0, 0].set_aspect('equal')
 
                 for stroke in split_strokes(cumsum(np.array(coords))):
                     ax[0, 1].plot(stroke[:, 0], -stroke[:, 1])
                 ax[0, 1].set_title('Handwriting')
+                ax[0, 1].set_aspect('equal')
 
                 phi_img = np.vstack(phi_data).T[::-1, :]
                 ax[1, 0].imshow(phi_img, interpolation='nearest', aspect='auto', cmap=cm.jet)
@@ -159,33 +163,45 @@ def main():
 
                 plt.show()
             else:
+                fig, ax = plt.subplots(1, 1)
                 for stroke in split_strokes(cumsum(np.array(coords))):
                     plt.plot(stroke[:, 0], -stroke[:, 1])
-                plt.title('Handwriting')
+                ax.set_title('Handwriting')
+                ax.set_aspect('equal')
                 plt.show()
 
             if args.animation:
-                fig, ax = plt.subplots(1, 1)
+                fig, ax = plt.subplots(1, 1, frameon=False, figsize=(2 * (maxx - minx + 2) / (maxy - miny + 1), 2))
                 ax.set_xlim(minx - 1., maxx + 1.)
                 ax.set_ylim(-maxy - 0.5, -miny + 0.5)
-                ax.hold(True)
+                ax.set_aspect('equal')
+                ax.axis('off')
+                # ax.hold(True)
 
-                plt.show(False)
                 plt.draw()
+                plt.show(False)
 
                 background = fig.canvas.copy_from_bbox(ax.bbox)
 
                 sumed = cumsum(coords)
-                for c1, c2 in zip(sumed, sumed[1:]):
+
+                def _update(i):
+                    c1, c2 = sumed[i: i+2]
+                    fig.canvas.restore_region(background)
                     if c1[2] == 1. and c2[2] == 1.:
-                        fig.canvas.restore_region(background)
-                        ax.plot([c2[0], c2[0]], [-c2[1], -c2[1]])
-                        fig.canvas.blit(ax.bbox)
+                        line, = ax.plot([c2[0], c2[0]], [-c2[1], -c2[1]])
                     elif c1[2] != 1.:
-                        fig.canvas.restore_region(background)
-                        plt.plot([c1[0], c2[0]], [-c1[1], -c2[1]])
-                        fig.canvas.blit(ax.bbox)
-                    plt.pause(0.0001)
+                        line, = ax.plot([c1[0], c2[0]], [-c1[1], -c2[1]])
+                    else:
+                        line, = ax.plot([c1[0], c1[0]], [-c1[1], -c1[1]])
+                    fig.canvas.blit(ax.bbox)
+                    return line,
+
+                anim = animation.FuncAnimation(fig, _update, frames=len(sumed) - 2,
+                                               interval=16, blit=True, repeat=False)
+                if args.save is not None:
+                    anim.save(args.save, fps=60, extra_args=['-vcodec', 'libx264'])
+                plt.show()
 
             if args.text is not None:
                 break

@@ -4,7 +4,7 @@ Implementation of handwriting generation with use of recurrent neural networks i
 ## How to train a model and generate handwriting
 
 #### 1. Download dataset
-First you need to download this dataset ([data/original-xml-part.tar.gz](http://www.fki.inf.unibe.ch/databases/iam-on-line-handwriting-database/download-the-iam-on-line-handwriting-database)) and unpack it in repository directory.
+First you need to download dataset. This requires you to register on [this page](http://www.fki.inf.unibe.ch/databases/iam-on-line-handwriting-database) ("Download" section). After registration you will be able to download the [data/original-xml-part.tar.gz](http://www.fki.inf.unibe.ch/databases/iam-on-line-handwriting-database/download-the-iam-on-line-handwriting-database). Unpack it in repository directory.
 
 #### 2. Preprocess dataset
 ```

@@ -59,16 +59,16 @@ def sample_text(sess, args_text, translation, style=None):
     coord = np.array([0., 0., 1.])
     coords = [coord]
 
-    # Prime the model with the authors style if requested
+    # Prime the model with the author style if requested
     prime_len = 0
     if style is not None:
-        # Priming consist of first training the network with the character sequence + strokes then 
-        #   generating the requested sequence of character and finally clipping the output to the requested character
+        # Priming consist of joining to a real pen-position and character sequences the synthetic sequence to generate
+        #   and set the synthetic pen-position to a null vector (the positions are sampled from the MDN)
         style_coords, style_text = style
         prime_len = len(style_coords)
         coords = list(style_coords)
         coord = coords[0] # Set the first pen stroke as the first element to process
-        text = np.r_[style_text, text] # concatenate on 1 axis the prime text + synthesis text ascii characters
+        text = np.r_[style_text, text] # concatenate on 1 axis the prime text + synthesis character sequence
         sequence_prime = np.eye(len(translation), dtype=np.float32)[style_text]
         sequence_prime = np.expand_dims(np.concatenate([sequence_prime, np.zeros((1, len(translation)))]), axis=0)
 

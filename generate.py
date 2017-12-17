@@ -60,14 +60,15 @@ def sample_text(sess, args_text, translation, style=None):
     coords = [coord]
 
     # Prime the model with the author style if requested
-    prime_len = 0
+    prime_len, style_len = 0, 0
     if style is not None:
         # Priming consist of joining to a real pen-position and character sequences the synthetic sequence to generate
         #   and set the synthetic pen-position to a null vector (the positions are sampled from the MDN)
         style_coords, style_text = style
         prime_len = len(style_coords)
-        coords = list(style_coords)
-        coord = coords[0] # Set the first pen stroke as the first element to process
+        style_len = len(style_text)
+        prime_coords = list(style_coords)
+        coord = prime_coords[0] # Set the first pen stroke as the first element to process
         text = np.r_[style_text, text] # concatenate on 1 axis the prime text + synthesis character sequence
         sequence_prime = np.eye(len(translation), dtype=np.float32)[style_text]
         sequence_prime = np.expand_dims(np.concatenate([sequence_prime, np.zeros((1, len(translation)))]), axis=0)
@@ -77,12 +78,11 @@ def sample_text(sess, args_text, translation, style=None):
 
     phi_data, window_data, kappa_data, stroke_data = [], [], [], []
     sess.run(vs.zero_states)
-    for s in range(1, 60 * len(args_text) + 1):
-        is_priming = False
-        if s < prime_len:
-            is_priming = True
+    sequence_len = len(args_text) + style_len
+    for s in range(1, 60 * sequence_len + 1):
+        is_priming = s < prime_len
 
-        print('\r[{:5d}] sampling... {}'.format(s, 'priming' if is_priming else 'synthesis'))
+        print('\r[{:5d}] sampling... {}'.format(s, 'priming' if is_priming else 'synthesis'), end='')
 
         e, pi, mu1, mu2, std1, std2, rho, \
         finish, phi, window, kappa = sess.run([vs.e, vs.pi, vs.mu1, vs.mu2,
@@ -96,7 +96,7 @@ def sample_text(sess, args_text, translation, style=None):
 
         if is_priming:
             # Use the real coordinate if priming
-            coord = coords[s]
+            coord = prime_coords[s]
         else:
             # Synthesis mode
             phi_data += [phi[0, :]]

@@ -40,6 +40,7 @@ Additional options for generation:
 * `--bias` (`float`) - with higher bias generated handwriting is more _clear_ so to speak (read paper for more info)
 * `--noinfo` - plots only generated handwriting (without attention window)
 * `--animation` - animation of writing
+* `--style` - style of handwriting, `int` from 0 to 7 (functionality added thanks to [@kristofbc](https://github.com/kristofbc), you can look how each style looks like in `imgs` folder)
 
 #### Examples
 ```
